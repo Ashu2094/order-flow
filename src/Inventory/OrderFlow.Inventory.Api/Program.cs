@@ -35,34 +35,53 @@ app.MapGet("/api/inventory/{id:guid}", (Guid id) =>
         : Results.Ok(InventoryItemDto.From(item));
 });
 
+
 app.MapPost("/api/inventory", (CreateInventoryItemRequest request) =>
 {
+    var errors = InventoryValidator.ValidateCreate(request);
+
+    if (errors.Count > 0)
+        return Results.ValidationProblem(errors);
+
     var item = InventoryItem.Create(
         Guid.NewGuid(),
-        request.Sku,
-        request.Name,
+        request.Sku.Trim().ToUpperInvariant(),
+        request.Name.Trim(),
         request.Quantity,
         request.Price,
         request.Description);
 
     items.Add(item);
 
-    return Results.Created($"/api/inventory/{item.Id}", InventoryItemDto.From(item));
+    return Results.Created(
+        $"/api/inventory/{item.Id}",
+        InventoryItemDto.From(item));
 });
+
+
 
 app.MapPut("/api/inventory/{id:guid}",
     (Guid id, UpdateInventoryItemRequest request) =>
     {
+        var errors = InventoryValidator.ValidateUpdate(request);
+
+        if (errors.Count > 0)
+            return Results.ValidationProblem(errors);
+
         var item = items.FirstOrDefault(i => i.Id == id);
 
         if (item is null)
-        {
             return Results.NotFound();
-        }
 
-        item.Update(request.Name, request.Description, request.Quantity, request.Price);
+        item.Update(
+            request.Name.Trim(),
+            request.Description,
+            request.Quantity,
+            request.Price);
+
         return Results.Ok(InventoryItemDto.From(item));
     });
+
 
 app.MapDelete("/api/inventory/{id:guid}",
     (Guid id) =>

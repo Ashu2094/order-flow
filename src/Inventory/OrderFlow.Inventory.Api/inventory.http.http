@@ -14,7 +14,7 @@ GET {{host}}/api/nothing
 POST {{host}}/api/inventory
 
 ### 5. Get one item
-GET {{host}}/api/inventory/11111111-1111-1111-1111-111111111111
+GET {{host}}/api/inventory/b09d17db-9a65-48e0-82b9-5f0049dc55d1
 
 ### 6. Unknown id
 GET {{host}}/api/inventory/99999999-9999-9999-9999-999999999999
@@ -40,5 +40,70 @@ Content-Type: application/json
 DELETE {{host}}/api/inventory/33333333-3333-3333-3333-333333333333
 
 
+
+### 10. Bad: empty name
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "OK-1",
+  "name": "",
+  "quantity": 5,
+  "price": 10
+}
+
+
+### 11. Bad: negative quantity
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "OK-1",
+  "name": "Thing",
+  "quantity": -3,
+  "price": 10
+}
+
+
+### 12. Bad: invalid SKU
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "bad sku!",
+  "name": "Thing",
+  "quantity": 5,
+  "price": 10
+}
+
+
+### 13. Everything bad at once
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "",
+  "name": " ",
+  "quantity": -1,
+  "price": -5
+}
+
+
+
+### 14. Empty body
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+
+### 15. Text where a number belongs
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "OK-2",
+  "name": "Thing",
+  "quantity": "lots",
+  "price": 10
+}
 
 
