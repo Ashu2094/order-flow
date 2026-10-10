@@ -9,4 +9,7 @@
     <Project Path="src/Inventory/OrderFlow.Inventory.Domain/OrderFlow.Inventory.Domain.csproj" />
     <Project Path="src/Inventory/OrderFlow.Inventory.Infrastructure/OrderFlow.Inventory.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OrderFlow.Inventory.Tests/OrderFlow.Inventory.Tests.csproj" />
+  </Folder>
 </Solution>
