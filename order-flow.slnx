@@ -3,4 +3,10 @@
   <Folder Name="/src/Contracts/">
     <Project Path="src/Contracts/OrderFlow.Contracts.csproj" />
   </Folder>
+  <Folder Name="/src/Inventory/">
+    <Project Path="src/Inventory/OrderFlow.Inventory.Api/OrderFlow.Inventory.Api.csproj" />
+    <Project Path="src/Inventory/OrderFlow.Inventory.Application/OrderFlow.Inventory.Application.csproj" />
+    <Project Path="src/Inventory/OrderFlow.Inventory.Domain/OrderFlow.Inventory.Domain.csproj" />
+    <Project Path="src/Inventory/OrderFlow.Inventory.Infrastructure/OrderFlow.Inventory.Infrastructure.csproj" />
+  </Folder>
 </Solution>

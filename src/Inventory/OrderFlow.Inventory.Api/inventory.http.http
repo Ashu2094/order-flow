@@ -1,0 +1,22 @@
+
+@host = http://localhost:5213
+
+### 1. Ping
+GET {{host}}/ping
+
+### 2. List inventory
+GET {{host}}/api/inventory
+
+### 3. Route that does not exist
+GET {{host}}/api/nothing
+
+### 4. Wrong HTTP method
+POST {{host}}/api/inventory
+
+### 5. Get one item
+GET {{host}}/api/inventory/11111111-1111-1111-1111-111111111111
+
+### 6. Unknown id
+GET {{host}}/api/inventory/99999999-9999-9999-9999-999999999999
+
+
