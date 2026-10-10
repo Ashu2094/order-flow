@@ -35,4 +35,46 @@ app.MapGet("/api/inventory/{id:guid}", (Guid id) =>
         : Results.Ok(InventoryItemDto.From(item));
 });
 
+app.MapPost("/api/inventory", (CreateInventoryItemRequest request) =>
+{
+    var item = InventoryItem.Create(
+        Guid.NewGuid(),
+        request.Sku,
+        request.Name,
+        request.Quantity,
+        request.Price,
+        request.Description);
+
+    items.Add(item);
+
+    return Results.Created($"/api/inventory/{item.Id}", InventoryItemDto.From(item));
+});
+
+app.MapPut("/api/inventory/{id:guid}",
+    (Guid id, UpdateInventoryItemRequest request) =>
+    {
+        var item = items.FirstOrDefault(i => i.Id == id);
+
+        if (item is null)
+        {
+            return Results.NotFound();
+        }
+
+        item.Update(request.Name, request.Description, request.Quantity, request.Price);
+        return Results.Ok(InventoryItemDto.From(item));
+    });
+
+app.MapDelete("/api/inventory/{id:guid}",
+    (Guid id) =>
+    {
+        var item = items.FirstOrDefault(i => i.Id == id);
+
+        if (item is null)
+            return Results.NotFound();
+
+        items.Remove(item);
+
+        return Results.NoContent();
+    });
+
 app.Run();

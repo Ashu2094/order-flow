@@ -17,13 +17,7 @@ public class InventoryItem
 
     public decimal Price { get; private set; }
 
-    public static InventoryItem Create(
-        Guid id,
-        string sku,
-        string name,
-        int quantity,
-        decimal price,
-        string? description = null)
+    public static InventoryItem Create(Guid id,string sku,string name,int quantity,decimal price,string? description = null)
     {
         return new InventoryItem
         {
@@ -35,4 +29,13 @@ public class InventoryItem
             Description = description
         };
     }
+
+    public void Update(string name,string? description,int quantity,decimal price)
+    {
+        Name = name;
+        Description = description;
+        Quantity = quantity;
+        Price = price;
+    }
+
 }
