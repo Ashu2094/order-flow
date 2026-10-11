@@ -53,12 +53,19 @@ var items = new List<InventoryItem>
 app.MapGet("/ping", () =>
     Results.Ok(new { service = "inventory", status = "up" }));
 
-app.MapGet("/api/inventory", () =>
-    Results.Ok(items.Select(InventoryItemDto.From).ToList()));
+app.MapGet("/api/inventory", async(InventoryDbContext db, CancellationToken ct) =>
+   {
+       var entities = await db.InventoryItems.OrderBy(i=>i.Name).ToListAsync(ct);
 
-app.MapGet("/api/inventory/{id:guid}", (Guid id) =>
+       return Results.Ok(entities.Select(InventoryItemDto.From).ToList());
+
+   }
+);
+
+app.MapGet("/api/inventory/{id:guid}", async (Guid id, InventoryDbContext db, CancellationToken ct) =>
 {
-    var item = items.FirstOrDefault(i => i.Id == id);
+    var item = await db.InventoryItems
+        .FirstOrDefaultAsync(i => i.Id == id, ct);
 
     return item is null
         ? Results.NotFound()
@@ -66,28 +73,44 @@ app.MapGet("/api/inventory/{id:guid}", (Guid id) =>
 });
 
 
-app.MapPost("/api/inventory", (CreateInventoryItemRequest request) =>
+app.MapPost("/api/inventory", async (CreateInventoryItemRequest request, InventoryDbContext db, CancellationToken ct) =>
 {
     var errors = InventoryValidator.ValidateCreate(request);
 
     if (errors.Count > 0)
+    {
         return Results.ValidationProblem(errors);
+    }
+
+    var sku = request.Sku.Trim().ToUpperInvariant();
+
+    var exists = await db.InventoryItems.AnyAsync(i => i.Sku == sku, ct);
+    if (exists)
+    {
+        return Results.Problem(
+            title: "SKU already exists",
+            detail: $"An item with SKU '{sku}' already exists",
+            statusCode: StatusCodes.Status409Conflict);
+
+    }
 
     var item = InventoryItem.Create(
         Guid.NewGuid(),
-        request.Sku.Trim().ToUpperInvariant(),
+        sku,
         request.Name.Trim(),
         request.Quantity,
         request.Price,
-        request.Description);
+        request.Description
+        );
+    db.InventoryItems.Add(item);
 
-    items.Add(item);
+        await db.SaveChangesAsync(ct);
 
     return Results.Created(
         $"/api/inventory/{item.Id}",
         InventoryItemDto.From(item));
 });
-
+    
 
 
 app.MapPut("/api/inventory/{id:guid}",
