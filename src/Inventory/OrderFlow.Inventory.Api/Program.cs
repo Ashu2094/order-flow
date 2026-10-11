@@ -2,14 +2,44 @@
 using OrderFlow.Inventory.Application;
 using OrderFlow.Inventory.Domain;
 using OrderFlow.Inventory.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString =
+    builder.Configuration.GetConnectionString("InventoryDb")
+    ?? throw new InvalidOperationException(
+        "Connection string 'InventoryDb' is missing. Set it with dotnet user-secrets.");
+
 builder.Services
     .AddApplication()
-    .AddInfrastructure();
+    .AddInfrastructure(connectionString);
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<InventoryDbContext>();
+
+    try
+    {
+        await db.Database.OpenConnectionAsync();
+        await db.Database.CloseConnectionAsync();
+
+        app.Logger.LogInformation(
+            "Connected to the inventory database.");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(
+            ex,
+            "Cannot reach the inventory database.");
+
+        throw;
+    }
+}
+
 
 var items = new List<InventoryItem>
 {
