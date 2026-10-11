@@ -1,57 +1,63 @@
-
 @host = http://localhost:5213
+@itemId = PASTE-AN-ID-HERE
 
-### 1. Ping
+### 01 Ping -> 200
 GET {{host}}/ping
 
-### 2. List inventory
+### 02 List -> 200
 GET {{host}}/api/inventory
 
-### 3. Route that does not exist
-GET {{host}}/api/nothing
-
-### 4. Wrong HTTP method
-POST {{host}}/api/inventory
-
-### 5. Get one item
-GET {{host}}/api/inventory/db3ec9b5-3b6b-4f2c-8803-3c75bccf0bea
-
-### 6. Unknown id
-GET {{host}}/api/inventory/99999999-9999-9999-9999-999999999999
-
-### 4. Wrong verb
-DELETE {{host}}/api/inventory
-
-
-### 7. Create
+### 03 Create valid -> 201 with Location header
 POST {{host}}/api/inventory
 Content-Type: application/json
 
 {
-  "sku": "WC-009",
+  "sku": "wc-009",
   "name": "Webcam",
   "description": "1080p",
   "quantity": 12,
   "price": 59.00
 }
 
-### 8. PUT
-PUT {{host}}/api/inventory/db3ec9b5-3b6b-4f2c-8803-3c75bccf0bea 
+### 04 Create duplicate SKU -> 409
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "WC-009",
+  "name": "Webcam again",
+  "quantity": 1,
+  "price": 1
+}
+
+### 05 Get one -> 200
+GET {{host}}/api/inventory/{{itemId}}
+
+### 06 Get unknown id -> 404
+GET {{host}}/api/inventory/99999999-9999-9999-9999-999999999999
+
+### 07 Update -> 200
+PUT {{host}}/api/inventory/{{itemId}}
 Content-Type: application/json
 
 {
   "name": "Webcam",
   "description": "1080p",
   "quantity": 30,
-  "price": 69.00
+  "price": 59.00
 }
 
-### 9. Delete
-DELETE {{host}}/api/inventory/33333333-3333-3333-3333-333333333333
+### 08 Update unknown id -> 404
+PUT {{host}}/api/inventory/99999999-9999-9999-9999-999999999999
+Content-Type: application/json
 
+{
+  "name": "Ghost",
+  "quantity": 1,
+  "price": 1
+}
 
-
-### 10. Bad: empty name
+### 09 Empty name -> 400
 POST {{host}}/api/inventory
 Content-Type: application/json
 
@@ -62,8 +68,7 @@ Content-Type: application/json
   "price": 10
 }
 
-
-### 11. Bad: negative quantity
+### 10 Negative quantity -> 400
 POST {{host}}/api/inventory
 Content-Type: application/json
 
@@ -74,8 +79,7 @@ Content-Type: application/json
   "price": 10
 }
 
-
-### 12. Bad: invalid SKU
+### 11 Invalid SKU -> 400
 POST {{host}}/api/inventory
 Content-Type: application/json
 
@@ -86,8 +90,7 @@ Content-Type: application/json
   "price": 10
 }
 
-
-### 13. Everything bad at once
+### 12 Everything bad -> 400 with 4 errors
 POST {{host}}/api/inventory
 Content-Type: application/json
 
@@ -98,14 +101,11 @@ Content-Type: application/json
   "price": -5
 }
 
-
-
-### 14. Empty body
+### 13 Empty body -> 400
 POST {{host}}/api/inventory
 Content-Type: application/json
 
-
-### 15. Text where a number belongs
+### 14 Text where a number belongs -> 400
 POST {{host}}/api/inventory
 Content-Type: application/json
 
@@ -116,4 +116,14 @@ Content-Type: application/json
   "price": 10
 }
 
+### 15 Wrong verb -> 405
+DELETE {{host}}/api/inventory
 
+### 16 Unknown route -> 404
+GET {{host}}/api/nothing
+
+### 17 Delete -> 204
+DELETE {{host}}/api/inventory/{{itemId}}
+
+### 18 Get the deleted item -> 404
+GET {{host}}/api/inventory/{{itemId}}

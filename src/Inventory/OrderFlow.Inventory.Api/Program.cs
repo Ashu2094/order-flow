@@ -1,8 +1,8 @@
 
+using Microsoft.EntityFrameworkCore;
 using OrderFlow.Inventory.Application;
 using OrderFlow.Inventory.Domain;
 using OrderFlow.Inventory.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
