@@ -14,7 +14,7 @@ GET {{host}}/api/nothing
 POST {{host}}/api/inventory
 
 ### 5. Get one item
-GET {{host}}/api/inventory/b09d17db-9a65-48e0-82b9-5f0049dc55d1
+GET {{host}}/api/inventory/db3ec9b5-3b6b-4f2c-8803-3c75bccf0bea
 
 ### 6. Unknown id
 GET {{host}}/api/inventory/99999999-9999-9999-9999-999999999999
@@ -35,6 +35,16 @@ Content-Type: application/json
   "price": 59.00
 }
 
+### 8. PUT
+PUT {{host}}/api/inventory/db3ec9b5-3b6b-4f2c-8803-3c75bccf0bea 
+Content-Type: application/json
+
+{
+  "name": "Webcam",
+  "description": "1080p",
+  "quantity": 30,
+  "price": 69.00
+}
 
 ### 9. Delete
 DELETE {{host}}/api/inventory/33333333-3333-3333-3333-333333333333
