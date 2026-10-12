@@ -1,0 +1,4 @@
+@host = http://localhost:5214
+
+### 01 Ping -> 200
+GET {{host}}/ping
