@@ -1,4 +1,55 @@
 @host = http://localhost:5214
+@orderId = PASTE-AN-ID-HERE
 
 ### 01 Ping -> 200
 GET {{host}}/ping
+
+### 02 Create order -> 201
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Asha Rao 3",
+  "items": [
+    {
+      "sku": "kb-001",
+      "quantity": 2,
+      "unitPrice": 49.99
+    },
+    {
+      "sku": "ms-002",
+      "quantity": 1,
+      "unitPrice": 19.50
+    }
+  ]
+}
+
+### 03 Get order -> 200 with 2 items
+GET {{host}}/api/orders/0dd47069-fc31-46df-a9b5-b64f4f96974e
+
+### 04 Unknown order -> 404
+GET {{host}}/api/orders/99999999-9999-9999-9999-999999999999
+
+### 05 No items -> 400
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Asha Rao",
+  "items": []
+}
+
+### 06 Bad item -> 400 with 3 errors
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Asha Rao",
+  "items": [
+    {
+      "sku": "",
+      "quantity": 0,
+      "unitPrice": -1
+    }
+  ]
+}
