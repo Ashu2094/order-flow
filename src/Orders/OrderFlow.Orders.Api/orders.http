@@ -53,3 +53,18 @@ Content-Type: application/json
     }
   ]
 }
+
+### 07 List page 1
+GET {{host}}/api/orders?page=1&pageSize=10
+
+### 08 List page 2
+GET {{host}}/api/orders?page=2&pageSize=10
+
+### 09 Default paging
+GET {{host}}/api/orders
+
+### 10 Bad page
+GET {{host}}/api/orders?page=-1&pageSize=10
+
+### 11 Huge page size
+GET {{host}}/api/orders?page=1&pageSize=100000

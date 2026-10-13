@@ -19,6 +19,58 @@ var app = builder.Build();
 app.MapGet("/ping", () =>
     Results.Ok(new { service = "orders", status = "up" }));
 
+app.MapGet("/api/orders", async (
+    int? page,
+    int? pageSize,
+    OrdersDbContext db,
+    CancellationToken ct) =>
+{
+    var pageNumber = page ?? 1;
+    var size = pageSize ?? 10;
+
+    var errors = new Dictionary<string, string[]>();
+    if (pageNumber < 1)
+    {
+        errors["page"] = ["Page must be 1 or greater."];
+    }
+
+    if (size < 1 || size > 100)
+    {
+        errors["pageSize"] =
+            ["Page size must be between 1 and 100."];
+    }
+
+    if (errors.Count > 0)
+    {
+        return Results.ValidationProblem(errors);
+    }
+
+    var query = db.Orders.AsNoTracking();
+
+    var total = await query.CountAsync(ct); //This obtains the total number of orders, not just the number on the current page.
+
+    var items = await query
+        .OrderByDescending(o => o.CreatedAtUtc)
+        .ThenBy(o => o.Id)//ThenBy(o => o.Id) gives the results a consistent tie-breaker when creation timestamps match.
+        .Skip((pageNumber - 1) * size)
+        .Take(size)
+        .Select(o => new OrderSummaryDto(
+            o.Id,
+            o.CustomerName,
+            o.Status.ToString(),
+            o.CreatedAtUtc,
+            o.Items.Count,
+            o.Items.Sum(i => i.Quantity * i.UnitPrice)))
+        .ToListAsync(ct);
+
+    return Results.Ok(
+        new PagedResult<OrderSummaryDto>(
+            items,
+            pageNumber,
+            size,
+            total));
+});
+
 app.MapGet(
     "/api/orders/{id:guid}",
     async (
