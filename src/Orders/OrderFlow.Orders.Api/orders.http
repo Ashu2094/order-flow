@@ -58,7 +58,7 @@ Content-Type: application/json
 GET {{host}}/api/orders?page=1&pageSize=10
 
 ### 08 List page 2
-GET {{host}}/api/orders?page=2&pageSize=10
+GET {{host}}/api/orders?page=&pageSize=10
 
 ### 09 Default paging
 GET {{host}}/api/orders

@@ -1,7 +1,7 @@
-using OrderFlow.Orders.Application;
-using OrderFlow.Orders.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using OrderFlow.Orders.Application;
 using OrderFlow.Orders.Domain;
+using OrderFlow.Orders.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
