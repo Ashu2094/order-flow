@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderFlow.Orders.Application;
 using OrderFlow.Orders.Domain;
 using OrderFlow.Orders.Infrastructure;
+using OrderFlow.Orders.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,13 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(connectionString);
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.MapGet("/ping", () =>
     Results.Ok(new { service = "orders", status = "up" }));
@@ -124,5 +131,10 @@ app.MapPost(
             $"/api/orders/{order.Id}",
             OrderDto.From(order));
     });
+
+//app.MapGet("/api/debug/boom", () =>
+//{
+//    throw new InvalidOperationException("Secret detail from Orders");
+//});
 
 app.Run();

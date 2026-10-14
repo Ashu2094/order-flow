@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderFlow.Inventory.Application;
 using OrderFlow.Inventory.Domain;
 using OrderFlow.Inventory.Infrastructure;
+using OrderFlow.Inventory.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,13 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(connectionString);
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -163,5 +170,10 @@ app.MapDelete(
 
         return Results.NoContent();
     });
+//app.MapGet("/api/debug/boom", () =>
+//{
+//    throw new InvalidOperationException(
+//        "Secret detail: Host=localhost;Password=hunter2");
+//});
 
 app.Run();
