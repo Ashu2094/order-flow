@@ -4,6 +4,7 @@ using OrderFlow.Orders.Domain;
 using OrderFlow.Orders.Infrastructure;
 using OrderFlow.Orders.Api;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,15 @@ builder.Services
     .AddHealthChecks()
     .AddDbContextCheck<OrdersDbContext>("database");
 
+builder.Services
+    .AddOptions<InventoryServiceOptions>()
+    .Bind(builder.Configuration.GetSection(
+        InventoryServiceOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart(); // it validates the configuration when the application starts, ensuring that any misconfigurations are caught early.
+
 var app = builder.Build();
+
 app.Use(async (context, next) =>
 {
     var stopwatch = Stopwatch.StartNew();
@@ -166,4 +175,13 @@ app.MapPost(
 //    throw new InvalidOperationException("Secret detail from Orders");
 //});
 app.MapHealthChecks("/health");
+
+
+app.MapGet(
+    "/api/debug/config",
+    (IOptions<InventoryServiceOptions> options) =>
+        Results.Ok(new
+        {
+            inventoryBaseUrl = options.Value.BaseUrl
+        }));
 app.Run();
