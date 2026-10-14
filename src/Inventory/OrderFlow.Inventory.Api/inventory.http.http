@@ -128,3 +128,6 @@ DELETE {{host}}/api/inventory/{{itemId}}
 ### 18 Get the deleted item -> 404
 GET {{host}}/api/inventory/{{itemId}}
 
+### 19 Health -> 200 Healthy
+GET {{host}}/health
+

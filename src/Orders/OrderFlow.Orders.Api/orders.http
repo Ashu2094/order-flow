@@ -68,3 +68,6 @@ GET {{host}}/api/orders?page=-1&pageSize=10
 
 ### 11 Huge page size
 GET {{host}}/api/orders?page=1&pageSize=100000
+
+### 12 Health -> 200 Healthy
+GET {{host}}/health

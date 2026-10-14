@@ -3,6 +3,7 @@ using OrderFlow.Orders.Application;
 using OrderFlow.Orders.Domain;
 using OrderFlow.Orders.Infrastructure;
 using OrderFlow.Orders.Api;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +18,36 @@ builder.Services
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services
+    .AddHealthChecks()
+    .AddDbContextCheck<OrdersDbContext>("database");
 
 var app = builder.Build();
+app.Use(async (context, next) =>
+{
+    var stopwatch = Stopwatch.StartNew();
+
+    await next();
+
+    stopwatch.Stop();
+
+    var status = context.Response.StatusCode;
+
+    var level = status >= 500
+        ? LogLevel.Error
+        : status >= 400
+            ? LogLevel.Warning
+            : LogLevel.Information;
+
+    app.Logger.Log(
+        level,
+        "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs} ms",
+        context.Request.Method,
+        context.Request.Path,
+        status,
+        stopwatch.ElapsedMilliseconds);
+});
+
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -136,5 +165,5 @@ app.MapPost(
 //{
 //    throw new InvalidOperationException("Secret detail from Orders");
 //});
-
+app.MapHealthChecks("/health");
 app.Run();

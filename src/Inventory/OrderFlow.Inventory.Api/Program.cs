@@ -4,6 +4,7 @@ using OrderFlow.Inventory.Application;
 using OrderFlow.Inventory.Domain;
 using OrderFlow.Inventory.Infrastructure;
 using OrderFlow.Inventory.Api;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +19,35 @@ builder.Services
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks().AddDbContextCheck<InventoryDbContext>("database");
 
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    var stopwatch = Stopwatch.StartNew();
+
+    await next();
+
+    stopwatch.Stop();
+
+    var status = context.Response.StatusCode;
+
+    var level = status >= 500
+        ? LogLevel.Error
+        : status >= 400
+            ? LogLevel.Warning
+            : LogLevel.Information;
+
+    app.Logger.Log(
+        level,
+        "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs} ms",
+        context.Request.Method,
+        context.Request.Path,
+        status,
+        stopwatch.ElapsedMilliseconds);
+});
+
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -170,10 +198,11 @@ app.MapDelete(
 
         return Results.NoContent();
     });
-//app.MapGet("/api/debug/boom", () =>
-//{
-//    throw new InvalidOperationException(
-//        "Secret detail: Host=localhost;Password=hunter2");
-//});
+app.MapGet("/api/debug/boom", () =>
+{
+    throw new InvalidOperationException(
+        "Secret detail: Host=localhost;Password=hunter2");
+});
 
+app.MapHealthChecks("/health");
 app.Run();
