@@ -4,22 +4,20 @@
 ### 01 Ping -> 200
 GET {{host}}/ping
 
-### 02 Create order -> 201
+### 02 Create order -> 201 (prices come from Inventory)
 POST {{host}}/api/orders
 Content-Type: application/json
 
 {
-  "customerName": "Asha Rao 3",
+  "customerName": "Asha Rao",
   "items": [
     {
       "sku": "kb-001",
-      "quantity": 2,
-      "unitPrice": 49.99
+      "quantity": 2
     },
     {
       "sku": "ms-002",
-      "quantity": 1,
-      "unitPrice": 19.50
+      "quantity": 1
     }
   ]
 }
@@ -39,7 +37,8 @@ Content-Type: application/json
   "items": []
 }
 
-### 06 Bad item -> 400 with 3 errors
+
+### 06 Invalid item -> 400 with 2 errors
 POST {{host}}/api/orders
 Content-Type: application/json
 
@@ -48,8 +47,7 @@ Content-Type: application/json
   "items": [
     {
       "sku": "",
-      "quantity": 0,
-      "unitPrice": -1
+      "quantity": 0
     }
   ]
 }
@@ -71,3 +69,19 @@ GET {{host}}/api/orders?page=1&pageSize=100000
 
 ### 12 Health -> 200 Healthy
 GET {{host}}/health
+
+### 13 Unknown SKU -> 400
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Asha Rao",
+  "items": [
+    {
+      "sku": "nope-1",
+      "quantity": 1
+    }
+  ]
+}
+  
+

@@ -40,11 +40,11 @@ public static class OrderValidator
                     ["Quantity must be greater than 0."];
             }
 
-            if (item.UnitPrice < 0)
-            {
-                errors[$"items[{i}].unitPrice"] =
-                    ["Unit price cannot be negative."];
-            }
+            //if (item.UnitPrice < 0)
+            //{
+            //    errors[$"items[{i}].unitPrice"] =
+            //        ["Unit price cannot be negative."];
+            //}
         }
 
         return errors;

@@ -30,6 +30,19 @@ builder.Services
     .ValidateDataAnnotations()
     .ValidateOnStart(); // it validates the configuration when the application starts, ensuring that any misconfigurations are caught early.
 
+
+builder.Services.AddHttpClient<IInventoryClient, InventoryClient>((serviceProvider, client) =>
+{
+    //serviceProvider Gives access to services registered in DI
+    //client The HttpClient instance being configured.
+    var options = serviceProvider
+        .GetRequiredService<IOptions<InventoryServiceOptions>>()
+        .Value;
+
+    client.BaseAddress = new Uri(options.BaseUrl);
+});
+
+
 var app = builder.Build();
 
 app.Use(async (context, next) =>
@@ -138,6 +151,7 @@ app.MapPost(
     async (
         CreateOrderRequest request,
         OrdersDbContext db,
+        IInventoryClient inventory,
         CancellationToken ct) =>
     {
         var errors = OrderValidator.ValidateCreate(request);
@@ -150,19 +164,35 @@ app.MapPost(
         var order = Order.Create(
             Guid.NewGuid(),
             request.CustomerName.Trim(),
-            DateTime.UtcNow);
+            DateTime.UtcNow
+        );
 
-        foreach (var item in request.Items)
+        for (var i = 0; i < request.Items.Count; i++)
         {
+            var requested = request.Items[i];
+            var sku = requested.Sku.Trim().ToUpperInvariant();
+
+            var product = await inventory.GetBySkuAsync(sku, ct);
+
+            if (product is null)
+            {
+                errors[$"items[{i}].sku"] =
+                    [$"SKU '{sku}' does not exist in Inventory."];
+
+                continue;
+            }
+
             order.AddItem(
                 Guid.NewGuid(),
-                item.Sku.Trim().ToUpperInvariant(),
-                item.Quantity,
-                item.UnitPrice);
+                product.Sku,
+                requested.Quantity,
+                product.Price);
         }
 
-        db.Orders.Add(order);
+        if (errors.Count > 0)
+            return Results.ValidationProblem(errors);
 
+        db.Orders.Add(order);
         await db.SaveChangesAsync(ct);
 
         return Results.Created(

@@ -2,8 +2,8 @@
 
 public record CreateOrderItemRequest(
     string Sku,
-    int Quantity,
-    decimal UnitPrice);
+    int Quantity
+ );
 
 public record CreateOrderRequest(
     string CustomerName,

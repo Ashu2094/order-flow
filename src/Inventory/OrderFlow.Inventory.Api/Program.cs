@@ -205,4 +205,18 @@ app.MapGet("/api/debug/boom", () =>
 });
 
 app.MapHealthChecks("/health");
+
+app.MapGet("/api/inventory/by-sku/{sku}", async (string sku, InventoryDbContext db, CancellationToken ct) =>
+{
+    var normalized = sku.Trim().ToUpperInvariant();
+
+    var item = await db.InventoryItems
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(i => i.Sku == normalized, ct);
+
+    return item is null
+        ? Results.NotFound()
+        : Results.Ok(InventoryItemDto.From(item));
+});
+
 app.Run();

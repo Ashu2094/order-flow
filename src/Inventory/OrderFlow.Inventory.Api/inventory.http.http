@@ -131,3 +131,28 @@ GET {{host}}/api/inventory/{{itemId}}
 ### 19 Health -> 200 Healthy
 GET {{host}}/health
 
+
+### 20 Seed keyboard -> 201 (or 409 if it exists)
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "KB-001",
+  "name": "Keyboard",
+  "quantity": 25,
+  "price": 49.99
+}
+
+### 21 Seed mouse -> 201 (or 409 if it exists)
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "MS-002",
+  "name": "Mouse",
+  "quantity": 40,
+  "price": 19.50
+}
+
+### 22 Get by SKU -> 200
+GET {{host}}/api/inventory/by-sku/kb-001
