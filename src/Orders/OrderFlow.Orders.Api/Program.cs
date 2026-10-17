@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OrderFlow.Orders.Api;
 using OrderFlow.Orders.Application;
 using OrderFlow.Orders.Domain;
 using OrderFlow.Orders.Infrastructure;
-using OrderFlow.Orders.Api;
 using System.Diagnostics;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
