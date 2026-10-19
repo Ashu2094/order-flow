@@ -74,6 +74,16 @@ app.Use(async (context, next) =>
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+
+    var db = scope.ServiceProvider
+        .GetRequiredService<OrdersDbContext>();
+
+    await db.Database.MigrateAsync();
+}
+
 app.MapGet("/ping", () =>
     Results.Ok(new { service = "orders", status = "up" }));
 

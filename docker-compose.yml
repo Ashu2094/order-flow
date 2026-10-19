@@ -33,6 +33,35 @@ services:
       timeout: 3s
       retries: 10
 
+  inventory-api:
+    build:
+      context: .  #Build using the repository root as the build context.
+      dockerfile: src/Inventory/OrderFlow.Inventory.Api/Dockerfile
+    container_name: orderflow-inventory-api
+    environment:
+      ConnectionStrings__InventoryDb: "Host=inventory-db;Port=5432;Database=inventory;Username=inventory_user;Password=${INVENTORY_DB_PASSWORD}"
+      Database__MigrateOnStartup: "true"
+    ports:
+      - "5213:8080"
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+
+  orders-api:
+    build:
+      context: .
+      dockerfile: src/Orders/OrderFlow.Orders.Api/Dockerfile
+    container_name: orderflow-orders-api
+    environment:
+      ConnectionStrings__OrdersDb: "Host=orders-db;Port=5432;Database=orders;Username=orders_user;Password=${ORDERS_DB_PASSWORD}"
+      InventoryService__BaseUrl: "http://inventory-api:8080"
+      Database__MigrateOnStartup: "true"
+    ports:
+      - "5214:8080"
+    depends_on:
+      orders-db:
+        condition: service_healthy
+        
 volumes:
   orders-db-data:
   inventory-db-data:

@@ -23,6 +23,16 @@ builder.Services.AddHealthChecks().AddDbContextCheck<InventoryDbContext>("databa
 
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+
+    var migrationDb = migrationScope.ServiceProvider
+        .GetRequiredService<InventoryDbContext>();
+
+    await migrationDb.Database.MigrateAsync();
+}
+
 app.Use(async (context, next) =>
 {
     var stopwatch = Stopwatch.StartNew();
