@@ -3,7 +3,7 @@ namespace OrderFlow.Orders.Application;
 
 public interface IInventoryClient
 {
-    Task<InventoryItemInfo?> GetBySkuAsync(string sku,CancellationToken ct);
+    Task<InventoryItemInfo?> GetBySkuAsync(string sku, CancellationToken ct);
 }
 
 public record InventoryItemInfo(

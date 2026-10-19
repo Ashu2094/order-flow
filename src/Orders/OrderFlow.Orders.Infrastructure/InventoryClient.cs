@@ -7,7 +7,7 @@ namespace OrderFlow.Orders.Infrastructure;
 
 public class InventoryClient(HttpClient httpClient) : IInventoryClient
 {
-    public async Task<InventoryItemInfo?> GetBySkuAsync(string sku,CancellationToken ct)
+    public async Task<InventoryItemInfo?> GetBySkuAsync(string sku, CancellationToken ct)
     {
         var response = await httpClient.GetAsync(
             $"api/inventory/by-sku/{Uri.EscapeDataString(sku)}",

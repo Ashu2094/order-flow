@@ -91,9 +91,9 @@ using (var scope = app.Services.CreateScope())
 app.MapGet("/ping", () =>
     Results.Ok(new { service = "inventory", status = "up" }));
 
-app.MapGet("/api/inventory", async(InventoryDbContext db, CancellationToken ct) =>
+app.MapGet("/api/inventory", async (InventoryDbContext db, CancellationToken ct) =>
    {
-       var entities = await db.InventoryItems.AsNoTracking().OrderBy(i=>i.Name).ToListAsync(ct);
+       var entities = await db.InventoryItems.AsNoTracking().OrderBy(i => i.Name).ToListAsync(ct);
 
        return Results.Ok(entities.Select(InventoryItemDto.From).ToList());
 
@@ -142,7 +142,7 @@ app.MapPost("/api/inventory", async (CreateInventoryItemRequest request, Invento
         );
     db.InventoryItems.Add(item);
 
-        await db.SaveChangesAsync(ct);
+    await db.SaveChangesAsync(ct);
 
     return Results.Created(
         $"/api/inventory/{item.Id}",

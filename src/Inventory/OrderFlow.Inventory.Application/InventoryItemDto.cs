@@ -10,7 +10,8 @@ public record InventoryItemDto(
     string? Description,
     int Quantity,
     decimal Price
-){
+)
+{
     public static InventoryItemDto From(InventoryItem item)
     {
         return new InventoryItemDto(
