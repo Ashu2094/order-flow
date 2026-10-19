@@ -1,4 +1,5 @@
 
+using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using OrderFlow.Inventory.Application;
 using OrderFlow.Inventory.Domain;
@@ -20,6 +21,8 @@ builder.Services
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks().AddDbContextCheck<InventoryDbContext>("database");
+
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -144,7 +147,10 @@ app.MapPost("/api/inventory", async (CreateInventoryItemRequest request, Invento
     return Results.Created(
         $"/api/inventory/{item.Id}",
         InventoryItemDto.From(item));
-});
+}).WithSummary("Create an inventory item")
+.Produces<InventoryItemDto>(StatusCodes.Status201Created)
+.ProducesValidationProblem()
+.ProducesProblem(StatusCodes.Status409Conflict); ;
 
 
 
@@ -228,5 +234,8 @@ app.MapGet("/api/inventory/by-sku/{sku}", async (string sku, InventoryDbContext 
         ? Results.NotFound()
         : Results.Ok(InventoryItemDto.From(item));
 });
+
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 app.Run();

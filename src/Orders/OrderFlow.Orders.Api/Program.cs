@@ -1,3 +1,4 @@
+using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OrderFlow.Orders.Api;
@@ -42,6 +43,7 @@ builder.Services.AddHttpClient<IInventoryClient, InventoryClient>((serviceProvid
     client.BaseAddress = new Uri(options.BaseUrl);
 });
 
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -208,7 +210,9 @@ app.MapPost(
         return Results.Created(
             $"/api/orders/{order.Id}",
             OrderDto.From(order));
-    });
+    }).WithSummary("Create an order")
+.Produces<OrderDto>(StatusCodes.Status201Created)
+.ProducesValidationProblem(); ;
 
 //app.MapGet("/api/debug/boom", () =>
 //{
@@ -224,4 +228,8 @@ app.MapGet(
         {
             inventoryBaseUrl = options.Value.BaseUrl
         }));
+
+app.MapOpenApi();
+app.MapScalarApiReference();
+
 app.Run();
