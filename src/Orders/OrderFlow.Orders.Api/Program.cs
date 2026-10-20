@@ -193,6 +193,7 @@ app.MapPost(
         CreateOrderRequest request,
         OrdersDbContext db,
         IInventoryClient inventory,
+        IPublishEndpoint publishEndpoint,
         CancellationToken ct) =>
     {
         var errors = OrderValidator.ValidateCreate(request);
@@ -236,12 +237,21 @@ app.MapPost(
         db.Orders.Add(order);
         await db.SaveChangesAsync(ct);
 
-        return Results.Created(
-            $"/api/orders/{order.Id}",
-            OrderDto.From(order));
+        await publishEndpoint.Publish(
+            new OrderSubmitted(
+                order.Id,
+                order.CreatedAtUtc,
+                order.Items
+                    .Select(i => new OrderSubmittedItem(i.Sku, i.Quantity))
+                    .ToList()),
+            ct
+        );
+
+        return Results.Created($"/api/orders/{order.Id}",OrderDto.From(order));
+
     }).WithSummary("Create an order")
-.Produces<OrderDto>(StatusCodes.Status201Created)
-.ProducesValidationProblem(); ;
+        .Produces<OrderDto>(StatusCodes.Status201Created)
+        .ProducesValidationProblem(); 
 
 //app.MapGet("/api/debug/boom", () =>
 //{
@@ -261,15 +271,6 @@ app.MapGet(
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-app.MapPost(
-    "/api/debug/publish",
-    async (string text,IPublishEndpoint publishEndpoint,CancellationToken ct) =>
-    {
-        await publishEndpoint.Publish(
-            new TestMessage(text, DateTime.UtcNow),
-            ct);
 
-        return Results.Accepted();
-    });
 
 app.Run();
