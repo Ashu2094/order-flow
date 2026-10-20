@@ -21,7 +21,7 @@ services:
     container_name: orderflow-inventory-db
     environment:
       POSTGRES_DB: inventory
-      POSTGRES_USER: inventory_user
+      POSTGRES_USER: inventory_user 
       POSTGRES_PASSWORD: ${INVENTORY_DB_PASSWORD:?set INVENTORY_DB_PASSWORD in .env}
     ports:
       - "5434:5432"
@@ -32,6 +32,22 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: orderflow-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672" # Programs connect to RabbitMQ here
+      - "15672:15672" # You open the RabbitMQ management website here
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   inventory-api:
     build:
@@ -41,10 +57,15 @@ services:
     environment:
       ConnectionStrings__InventoryDb: "Host=inventory-db;Port=5432;Database=inventory;Username=inventory_user;Password=${INVENTORY_DB_PASSWORD}"
       Database__MigrateOnStartup: "true"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Username: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
     ports:
       - "5213:8080"
     depends_on:
       inventory-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   orders-api:
@@ -56,10 +77,15 @@ services:
       ConnectionStrings__OrdersDb: "Host=orders-db;Port=5432;Database=orders;Username=orders_user;Password=${ORDERS_DB_PASSWORD}"
       InventoryService__BaseUrl: "http://inventory-api:8080"
       Database__MigrateOnStartup: "true"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Username: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
     ports:
       - "5214:8080"
     depends_on:
       orders-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
         
 volumes:

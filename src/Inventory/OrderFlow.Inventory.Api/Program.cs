@@ -1,11 +1,12 @@
 
-using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using OrderFlow.Inventory.Api;
 using OrderFlow.Inventory.Application;
 using OrderFlow.Inventory.Domain;
 using OrderFlow.Inventory.Infrastructure;
-using OrderFlow.Inventory.Api;
+using Scalar.AspNetCore;
 using System.Diagnostics;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,34 @@ builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks().AddDbContextCheck<InventoryDbContext>("database");
 
 builder.Services.AddOpenApi();
+
+var rabbitHost = builder.Configuration["RabbitMq:Host"]
+    ?? throw new InvalidOperationException(
+        "RabbitMq:Host is missing.");
+
+var rabbitUser = builder.Configuration["RabbitMq:Username"]
+    ?? throw new InvalidOperationException(
+        "RabbitMq:Username is missing. Set it with dotnet user-secrets.");
+
+var rabbitPassword = builder.Configuration["RabbitMq:Password"]
+    ?? throw new InvalidOperationException(
+        "RabbitMq:Password is missing. Set it with dotnet user-secrets.");
+
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<TestMessageConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(rabbitHost, "/", h =>
+        {
+            h.Username(rabbitUser);
+            h.Password(rabbitPassword);
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 

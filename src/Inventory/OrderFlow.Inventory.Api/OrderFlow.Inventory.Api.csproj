@@ -3,9 +3,11 @@
   <ItemGroup>
     <ProjectReference Include="..\OrderFlow.Inventory.Application\OrderFlow.Inventory.Application.csproj" />
     <ProjectReference Include="..\OrderFlow.Inventory.Infrastructure\OrderFlow.Inventory.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Contracts\OrderFlow.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.10" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

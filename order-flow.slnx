@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Contracts/">
+    <File Path="TestMessage.cs" />
     <Project Path="src/Contracts/OrderFlow.Contracts.csproj" />
   </Folder>
   <Folder Name="/src/Inventory/">

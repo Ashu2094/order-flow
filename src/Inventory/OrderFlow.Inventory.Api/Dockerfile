@@ -9,10 +9,12 @@ COPY src/Inventory/OrderFlow.Inventory.Api/OrderFlow.Inventory.Api.csproj src/In
 COPY src/Inventory/OrderFlow.Inventory.Application/OrderFlow.Inventory.Application.csproj src/Inventory/OrderFlow.Inventory.Application/
 COPY src/Inventory/OrderFlow.Inventory.Domain/OrderFlow.Inventory.Domain.csproj src/Inventory/OrderFlow.Inventory.Domain/
 COPY src/Inventory/OrderFlow.Inventory.Infrastructure/OrderFlow.Inventory.Infrastructure.csproj src/Inventory/OrderFlow.Inventory.Infrastructure/
+COPY src/Contracts/OrderFlow.Contracts.csproj src/Contracts/
 
 RUN dotnet restore src/Inventory/OrderFlow.Inventory.Api/OrderFlow.Inventory.Api.csproj
 
 COPY src/Inventory/ src/Inventory/
+COPY src/Contracts/ src/Contracts/
 
 RUN dotnet publish src/Inventory/OrderFlow.Inventory.Api/OrderFlow.Inventory.Api.csproj -c Release -o /app/publish --no-restore
 

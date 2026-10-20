@@ -6,9 +6,11 @@
   <ProjectReference Include="..\OrderFlow.Orders.Domain\OrderFlow.Orders.Domain.csproj" />
   <ProjectReference Include="..\OrderFlow.Orders.Application\OrderFlow.Orders.Application.csproj" />
   <ProjectReference Include="..\OrderFlow.Orders.Infrastructure\OrderFlow.Orders.Infrastructure.csproj" />
+  <ProjectReference Include="..\..\Contracts\OrderFlow.Contracts.csproj" />
 </ItemGroup>
 
 <ItemGroup>
+  <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.10" />
   <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
   <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
   <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">

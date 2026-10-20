@@ -1,10 +1,13 @@
-using Scalar.AspNetCore;
+using MassTransit;
+using MassTransit.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using OrderFlow.Contracts;
 using OrderFlow.Orders.Api;
 using OrderFlow.Orders.Application;
 using OrderFlow.Orders.Domain;
 using OrderFlow.Orders.Infrastructure;
+using Scalar.AspNetCore;
 using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +47,32 @@ builder.Services.AddHttpClient<IInventoryClient, InventoryClient>((serviceProvid
 });
 
 builder.Services.AddOpenApi();
+
+var rabbitHost = builder.Configuration["RabbitMq:Host"]
+    ?? throw new InvalidOperationException(
+        "RabbitMq:Host is missing.");
+
+var rabbitUser = builder.Configuration["RabbitMq:Username"]
+    ?? throw new InvalidOperationException(
+        "RabbitMq:Username is missing. Set it with dotnet user-secrets.");
+
+var rabbitPassword = builder.Configuration["RabbitMq:Password"]
+    ?? throw new InvalidOperationException(
+        "RabbitMq:Password is missing. Set it with dotnet user-secrets.");
+
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(rabbitHost, "/", h =>
+        {
+            h.Username(rabbitUser);
+            h.Password(rabbitPassword);
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 
@@ -231,5 +260,16 @@ app.MapGet(
 
 app.MapOpenApi();
 app.MapScalarApiReference();
+
+app.MapPost(
+    "/api/debug/publish",
+    async (string text,IPublishEndpoint publishEndpoint,CancellationToken ct) =>
+    {
+        await publishEndpoint.Publish(
+            new TestMessage(text, DateTime.UtcNow),
+            ct);
+
+        return Results.Accepted();
+    });
 
 app.Run();

@@ -84,5 +84,8 @@ Content-Type: application/json
     }
   ]
 }
+
+### 14 DEBUG publish test message
+POST {{host}}/api/debug/publish?text=testingwhennoqueue
   
 
