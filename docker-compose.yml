@@ -32,6 +32,23 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  
+  payments-db:
+    image: postgres:16
+    container_name: orderflow-payments-db
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: payments_user
+      POSTGRES_PASSWORD: ${PAYMENTS_DB_PASSWORD:?set PAYMENTS_DB_PASSWORD in .env}
+    ports:
+      - "5435:5432"
+    volumes:
+      - payments-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payments_user -d payments"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     
   rabbitmq:
     image: rabbitmq:4-management
@@ -91,3 +108,4 @@ services:
 volumes:
   orders-db-data:
   inventory-db-data:
+  payments-db-data:

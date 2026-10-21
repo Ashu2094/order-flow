@@ -18,6 +18,12 @@
     <Project Path="src/Orders/OrderFlow.Orders.Domain/OrderFlow.Orders.Domain.csproj" />
     <Project Path="src/Orders/OrderFlow.Orders.Infrastructure/OrderFlow.Orders.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Payments/">
+    <Project Path="src/Payments/OrderFlow.Payments.Api/OrderFlow.Payments.Api.csproj" />
+    <Project Path="src/Payments/OrderFlow.Payments.Application/OrderFlow.Payments.Application.csproj" />
+    <Project Path="src/Payments/OrderFlow.Payments.Domain/OrderFlow.Payments.Domain.csproj" />
+    <Project Path="src/Payments/OrderFlow.Payments.Infrastructure/OrderFlow.Payments.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/OrderFlow.Inventory.Tests/OrderFlow.Inventory.Tests.csproj" />
   </Folder>

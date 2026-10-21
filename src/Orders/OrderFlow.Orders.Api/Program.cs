@@ -62,6 +62,9 @@ var rabbitPassword = builder.Configuration["RabbitMq:Password"]
 
 builder.Services.AddMassTransit(x =>
 {
+    x.AddConsumer<StockReservedConsumer>();
+    x.AddConsumer<StockReservationFailedConsumer>();
+    
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(rabbitHost, "/", h =>
@@ -73,6 +76,7 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 });
+
 
 var app = builder.Build();
 

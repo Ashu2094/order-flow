@@ -1,4 +1,7 @@
 ﻿
+using System.Runtime.Intrinsics.Arm;
+using System.Threading.Channels;
+
 namespace OrderFlow.Inventory.Domain;
 
 public class InventoryItem
@@ -36,6 +39,16 @@ public class InventoryItem
         Description = description;
         Quantity = quantity;
         Price = price;
+    }
+
+    public bool TryReserve(int quantity)
+    {
+        //Important: this method changes the in-memory entity.The Inventory consumer will save the change to the database later.
+        if (quantity <= 0 || quantity > Quantity)
+            return false;
+
+        Quantity -= quantity;
+        return true;
     }
 
 }

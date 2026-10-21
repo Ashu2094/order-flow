@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### 03 Get order -> 200 with 2 items
-GET {{host}}/api/orders/0dd47069-fc31-46df-a9b5-b64f4f96974e
+GET {{host}}/api/orders/05a505a7-0fae-4911-a266-9d6446a3b97d
 
 ### 04 Unknown order -> 404
 GET {{host}}/api/orders/99999999-9999-9999-9999-999999999999
@@ -85,6 +85,18 @@ Content-Type: application/json
   ]
 }
 
+### 14 Order too much -> 201 now, Failed a moment later
+POST {{host}}/api/orders
+Content-Type: application/json
 
+{
+  "customerName": "Asha Rao",
+  "items": [
+    {
+      "sku": "kb-001",
+      "quantity": 1000
+    }
+  ]
+}
   
 
