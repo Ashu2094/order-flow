@@ -27,4 +27,16 @@ public class Payment
             CreatedAtUtc = createdAtUtc
         };
     }
+
+    public void MarkSucceeded()
+    {
+        if (Status == PaymentStatus.Pending)
+            Status = PaymentStatus.Succeeded;
+    }
+
+    public void MarkFailed()
+    {
+        if (Status == PaymentStatus.Pending)
+            Status = PaymentStatus.Failed;
+    }
 }

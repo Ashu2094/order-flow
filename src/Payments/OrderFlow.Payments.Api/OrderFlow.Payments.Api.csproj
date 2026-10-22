@@ -3,9 +3,11 @@
   <ItemGroup>
     <ProjectReference Include="..\OrderFlow.Payments.Application\OrderFlow.Payments.Application.csproj" />
     <ProjectReference Include="..\OrderFlow.Payments.Infrastructure\OrderFlow.Payments.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Contracts\OrderFlow.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
