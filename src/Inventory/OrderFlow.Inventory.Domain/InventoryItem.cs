@@ -51,4 +51,10 @@ public class InventoryItem
         return true;
     }
 
+    public void Release(int quantity)
+    {
+        if (quantity > 0)
+            Quantity += quantity;
+    }
+
 }

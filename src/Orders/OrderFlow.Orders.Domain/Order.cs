@@ -50,4 +50,13 @@ public class Order
         if (Status == OrderStatus.Pending)
             Status = OrderStatus.Failed;
     }
+
+    public bool Cancel()
+    {
+        if (Status != OrderStatus.Pending)
+            return false;
+
+        Status = OrderStatus.Cancelled;
+        return true;
+    }
 }

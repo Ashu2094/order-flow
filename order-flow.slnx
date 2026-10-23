@@ -26,5 +26,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/OrderFlow.Inventory.Tests/OrderFlow.Inventory.Tests.csproj" />
+    <Project Path="tests/OrderFlow.Orders.Tests/OrderFlow.Orders.Tests.csproj" />
   </Folder>
 </Solution>

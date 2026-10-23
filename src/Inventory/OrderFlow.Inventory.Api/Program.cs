@@ -40,6 +40,7 @@ var rabbitPassword = builder.Configuration["RabbitMq:Password"]
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<OrderSubmittedConsumer>();
+    x.AddConsumer<ReleaseStockConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
