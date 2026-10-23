@@ -50,6 +50,14 @@ builder.Services.AddMassTransit(x =>
 });
 
 var app = builder.Build();
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider
+        .GetRequiredService<PaymentsDbContext>();
+
+    await db.Database.MigrateAsync();
+}
 
 using (var scope = app.Services.CreateScope())
 {
@@ -62,20 +70,6 @@ using (var scope = app.Services.CreateScope())
 app.MapGet("/ping", () =>
     Results.Ok(new { service = "payments", status = "up" }));
 
-app.MapPost("/api/debug/charge", async (
-    Guid orderId,
-    decimal amount,
-    ISendEndpointProvider sendEndpointProvider,
-    CancellationToken ct) =>
-{
-    var endpoint = await sendEndpointProvider.GetSendEndpoint(
-        new Uri("queue:ChargePayment"));
 
-    await endpoint.Send(
-        new ChargePayment(orderId, amount),
-        ct);
-
-    return Results.Accepted();
-});
 
 app.Run();

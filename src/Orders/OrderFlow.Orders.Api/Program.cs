@@ -64,7 +64,8 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<StockReservedConsumer>();
     x.AddConsumer<StockReservationFailedConsumer>();
-    
+    x.AddConsumer<PaymentCompletedConsumer>();
+
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(rabbitHost, "/", h =>

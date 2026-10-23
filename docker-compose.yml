@@ -104,6 +104,26 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    
+  payments-api:
+    build:
+      context: .
+      dockerfile: src/Payments/OrderFlow.Payments.Api/Dockerfile
+    container_name: orderflow-payments-api
+    environment:
+      ConnectionStrings__PaymentsDb: "Host=payments-db;Port=5432;Database=payments;Username=payments_user;Password=${PAYMENTS_DB_PASSWORD}"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Username: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      PaymentSimulation__ForceFailure: "${PAYMENT_FORCE_FAILURE:-false}"
+      Database__MigrateOnStartup: "true"
+    ports:
+      - "5215:8080"
+    depends_on:
+      payments-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
         
 volumes:
   orders-db-data:

@@ -3,5 +3,3 @@
 ### 01 Ping -> 200
 GET {{host}}/ping
 
-### 02 DEBUG send ChargePayment -> 202
-POST {{host}}/api/debug/charge?orderId=11111111-1111-1111-1111-111111111111&amount=119.48
