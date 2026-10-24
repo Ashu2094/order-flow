@@ -4,5 +4,5 @@
 GET {{host}}/ping
 
 
-### 03 DEBUG send the same ChargePayment twice -> 202
-POST {{host}}/api/debug/charge-twice?orderId=22222222-2222-2222-2222-222265422222&amount=50.00
+# ### 03 DEBUG send the same ChargePayment twice -> 202
+# POST {{host}}/api/debug/charge-twice?orderId=22222222-2222-2222-2222-222265422222&amount=50.00
