@@ -49,7 +49,12 @@ builder.Services.AddMassTransit(x =>
             h.Username(rabbitUser);
             h.Password(rabbitPassword);
         });
-
+        cfg.UseMessageRetry(r => r.Exponential(
+                                5,
+                                TimeSpan.FromSeconds(1),
+                                TimeSpan.FromSeconds(30),
+                                TimeSpan.FromSeconds(2))
+                            );
         cfg.ConfigureEndpoints(context);
     });
 });

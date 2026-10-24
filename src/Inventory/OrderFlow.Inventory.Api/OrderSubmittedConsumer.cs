@@ -6,7 +6,7 @@ using OrderFlow.Inventory.Infrastructure;
 
 namespace OrderFlow.Inventory.Api;
 
-public class OrderSubmittedConsumer(InventoryDbContext db,ILogger<OrderSubmittedConsumer> logger): IConsumer<OrderSubmitted>
+public class OrderSubmittedConsumer(InventoryDbContext db, ILogger<OrderSubmittedConsumer> logger) : IConsumer<OrderSubmitted>
 {
     //OrderSubmittedConsumer implements IConsumer class which has message of type OrderSubmitted.
     //It has a constructor that takes an ILogger < OrderSubmittedConsumer > parameter and assigns it to a private readonly field called logger.
@@ -16,6 +16,7 @@ public class OrderSubmittedConsumer(InventoryDbContext db,ILogger<OrderSubmitted
     public async Task Consume(ConsumeContext<OrderSubmitted> context)
     {
         var message = context.Message;
+
 
         var wanted = message.Items
             .GroupBy(i => i.Sku)
@@ -85,7 +86,7 @@ public class OrderSubmittedConsumer(InventoryDbContext db,ILogger<OrderSubmitted
         await context.Publish(
             new StockReservationFailed
             (
-                context.Message.OrderId,reason
-            ),context.CancellationToken);
+                context.Message.OrderId, reason
+            ), context.CancellationToken);
     }
 }

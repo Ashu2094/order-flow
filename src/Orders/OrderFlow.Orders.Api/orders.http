@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### 03 Get order -> 200 with 2 items
-GET {{host}}/api/orders/c60b42cc-6932-4df3-bab8-c653de9982ea
+GET {{host}}/api/orders/d01d6757-7d06-41f0-9497-a77d9470fb08
 
 ### 04 Unknown order -> 404
 GET {{host}}/api/orders/99999999-9999-9999-9999-999999999999
@@ -95,6 +95,20 @@ Content-Type: application/json
     {
       "sku": "kb-001",
       "quantity": 1000
+    }
+  ]
+}
+
+### 15 Poison order (quantity 13)
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Asha Rao",
+  "items": [
+    {
+      "sku": "kb-001",
+      "quantity": 13
     }
   ]
 }

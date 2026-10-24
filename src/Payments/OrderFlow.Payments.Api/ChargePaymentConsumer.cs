@@ -6,7 +6,7 @@ using OrderFlow.Payments.Infrastructure;
 
 namespace OrderFlow.Payments.Api;
 
-public class ChargePaymentConsumer(PaymentsDbContext db,IOptions<PaymentSimulationOptions> options,ILogger<ChargePaymentConsumer> logger) : IConsumer<ChargePayment>
+public class ChargePaymentConsumer(PaymentsDbContext db, IOptions<PaymentSimulationOptions> options, ILogger<ChargePaymentConsumer> logger) : IConsumer<ChargePayment>
 {
     public async Task Consume(ConsumeContext<ChargePayment> context)
     {

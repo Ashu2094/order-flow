@@ -75,6 +75,12 @@ builder.Services.AddMassTransit(x =>
             h.Password(rabbitPassword);
         });
 
+        cfg.UseMessageRetry(r =>
+            r.Exponential(
+                5,
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(30),
+                TimeSpan.FromSeconds(2)));
         cfg.ConfigureEndpoints(context);
     });
 });
@@ -253,11 +259,11 @@ app.MapPost(
             ct
         );
 
-        return Results.Created($"/api/orders/{order.Id}",OrderDto.From(order));
+        return Results.Created($"/api/orders/{order.Id}", OrderDto.From(order));
 
     }).WithSummary("Create an order")
         .Produces<OrderDto>(StatusCodes.Status201Created)
-        .ProducesValidationProblem(); 
+        .ProducesValidationProblem();
 
 //app.MapGet("/api/debug/boom", () =>
 //{
