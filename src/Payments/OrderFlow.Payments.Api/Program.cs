@@ -75,6 +75,29 @@ using (var scope = app.Services.CreateScope())
 app.MapGet("/ping", () =>
     Results.Ok(new { service = "payments", status = "up" }));
 
+//app.MapPost("/api/debug/charge-twice",
+//    async (
+//        Guid orderId,
+//        decimal amount,
+//        ISendEndpointProvider sendEndpointProvider,
+//        CancellationToken ct) =>
+//    {
+//        var endpoint = await sendEndpointProvider
+//            .GetSendEndpoint(new Uri("queue:ChargePayment"));
+
+//        var messageId = Guid.NewGuid();
+
+//        for (var i = 0; i < 2; i++)
+//        {
+//            await endpoint.Send(
+//                new ChargePayment(orderId, amount),
+//                ctx => ctx.MessageId = messageId,
+//                ct);
+//        }
+
+//        return Results.Accepted();
+//    });
+
 
 
 app.Run();

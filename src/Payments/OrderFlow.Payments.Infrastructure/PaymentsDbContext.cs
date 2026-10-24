@@ -8,6 +8,7 @@ public class PaymentsDbContext(
     : DbContext(options)
 {
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
 
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
@@ -16,5 +17,8 @@ public class PaymentsDbContext(
 
         modelBuilder.ApplyConfiguration(
             new PaymentConfiguration());
+
+        modelBuilder.ApplyConfiguration(
+    new ProcessedMessageConfiguration());
     }
 }

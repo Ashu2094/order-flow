@@ -49,6 +49,19 @@ namespace OrderFlow.Payments.Infrastructure.Migrations
 
                     b.ToTable("payments", (string)null);
                 });
+
+            modelBuilder.Entity("OrderFlow.Payments.Domain.ProcessedMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ProcessedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("MessageId");
+
+                    b.ToTable("processed_messages", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

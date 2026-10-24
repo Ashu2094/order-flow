@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using OrderFlow.Contracts;
 using OrderFlow.Payments.Domain;
 using OrderFlow.Payments.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrderFlow.Payments.Api;
 
@@ -10,16 +11,36 @@ public class ChargePaymentConsumer(PaymentsDbContext db, IOptions<PaymentSimulat
 {
     public async Task Consume(ConsumeContext<ChargePayment> context)
     {
+
         var message = context.Message;
+
+        var messageId = context.MessageId
+            ?? throw new InvalidOperationException(
+                "The message has no MessageId.");
+
+        if (await db.ProcessedMessages.AnyAsync(
+                m => m.MessageId == messageId,
+                context.CancellationToken))
+        {
+            logger.LogWarning(
+                "Duplicate message {MessageId} for order {OrderId} ignored",
+                messageId,
+                message.OrderId);
+
+            return;
+        }
 
         var payment = Payment.Create(
             Guid.NewGuid(),
             message.OrderId,
             message.Amount,
-            DateTime.UtcNow
-        );
+            DateTime.UtcNow);
 
         db.Payments.Add(payment);
+
+        db.ProcessedMessages.Add(
+            ProcessedMessage.Create(messageId, DateTime.UtcNow));
+
 
         if (options.Value.ForceFailure)
         {
