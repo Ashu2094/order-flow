@@ -97,6 +97,7 @@ services:
       RabbitMq__Host: rabbitmq
       RabbitMq__Username: ${RABBITMQ_USER}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      Chaos__CrashBeforePublish: "${CHAOS_CRASH_BEFORE_PUBLISH:-false}"
     ports:
       - "5214:8080"
     depends_on:

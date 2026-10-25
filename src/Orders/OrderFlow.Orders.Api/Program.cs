@@ -246,8 +246,21 @@ app.MapPost(
         if (errors.Count > 0)
             return Results.ValidationProblem(errors);
 
-        db.Orders.Add(order);
+        db.Orders.Add(order); 
+
         await db.SaveChangesAsync(ct);
+
+        if (app.Configuration.GetValue<bool>("Chaos:CrashBeforePublish"))
+        {
+            app.Logger.LogCritical(
+                "CHAOS: crashing after saving order {OrderId} and before publishing its event",
+                order.Id);
+
+            await Task.Delay(500);
+
+            Environment.FailFast(
+                "Chaos: simulated crash between save and publish.");
+        }
 
         await publishEndpoint.Publish(
             new OrderSubmitted(
