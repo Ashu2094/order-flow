@@ -1,6 +1,6 @@
 # OrderFlow
 ## Orders API
-
+![CI](https://github.com/ashu2094/order-flow/actions/workflows/ci.yml/badge.svg)
 | Method | Route | Success | Errors |
 |---|---|---|---|
 | GET | `/ping` | 200 | — |
