@@ -16,7 +16,7 @@ public class OrderStatusTests
         var result = order.Cancel();
 
         Assert.True(result);
-        Assert.Equal(OrderStatus.Confirmed, order.Status);
+        Assert.Equal(OrderStatus.Cancelled, order.Status);
     }
 
     [Fact]
