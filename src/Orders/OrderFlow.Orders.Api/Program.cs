@@ -67,6 +67,13 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<PaymentCompletedConsumer>();
     x.AddConsumer<PaymentFailedConsumer>();
 
+    x.AddEntityFrameworkOutbox<OrdersDbContext>(o =>
+    {
+        o.QueryDelay = TimeSpan.FromSeconds(1);
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
+
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(rabbitHost, "/", h =>
@@ -246,7 +253,18 @@ app.MapPost(
         if (errors.Count > 0)
             return Results.ValidationProblem(errors);
 
-        db.Orders.Add(order); 
+        db.Orders.Add(order);
+
+        await publishEndpoint.Publish(
+            new OrderSubmitted(
+                order.Id,
+                order.CreatedAtUtc,
+                order.Items.Select(i =>
+                    new OrderSubmittedItem(i.Sku, i.Quantity)
+                ).ToList()
+            ),
+            ct
+        );
 
         await db.SaveChangesAsync(ct);
 
@@ -262,15 +280,15 @@ app.MapPost(
                 "Chaos: simulated crash between save and publish.");
         }
 
-        await publishEndpoint.Publish(
-            new OrderSubmitted(
-                order.Id,
-                order.CreatedAtUtc,
-                order.Items
-                    .Select(i => new OrderSubmittedItem(i.Sku, i.Quantity))
-                    .ToList()),
-            ct
-        );
+        //await publishEndpoint.Publish(
+        //    new OrderSubmitted(
+        //        order.Id,
+        //        order.CreatedAtUtc,
+        //        order.Items
+        //            .Select(i => new OrderSubmittedItem(i.Sku, i.Quantity))
+        //            .ToList()),
+        //    ct
+        //);
 
         return Results.Created($"/api/orders/{order.Id}", OrderDto.From(order));
 
