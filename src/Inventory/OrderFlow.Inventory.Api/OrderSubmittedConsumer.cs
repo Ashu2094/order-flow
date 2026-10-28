@@ -71,6 +71,12 @@ public class OrderSubmittedConsumer(InventoryDbContext db, ILogger<OrderSubmitte
             new StockReserved(message.OrderId),
             context.CancellationToken);
 
+        //if (message.Items.Any(i => i.Quantity == 13))
+        //{
+        //    throw new InvalidOperationException(
+        //        "Simulated failure after save and publish (quantity 13).");
+        //}
+
         logger.LogInformation(
             "Stock reserved for order {OrderId}",
             message.OrderId);

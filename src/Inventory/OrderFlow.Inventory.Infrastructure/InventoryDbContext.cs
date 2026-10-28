@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderFlow.Inventory.Domain;
+using MassTransit;
 
 namespace OrderFlow.Inventory.Infrastructure;
 
@@ -14,5 +15,8 @@ public class InventoryDbContext(
     {
         modelBuilder.ApplyConfiguration(
             new InventoryItemConfiguration());
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderFlow.Payments.Domain;
+using MassTransit;
 
 namespace OrderFlow.Payments.Infrastructure;
 
@@ -20,5 +21,9 @@ public class PaymentsDbContext(
 
         modelBuilder.ApplyConfiguration(
     new ProcessedMessageConfiguration());
+
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
     }
 }

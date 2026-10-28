@@ -37,6 +37,13 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<ChargePaymentConsumer>();
 
+    x.AddEntityFrameworkOutbox<PaymentsDbContext>(o =>
+    {
+        o.QueryDelay = TimeSpan.FromSeconds(1);
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
+
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(rabbitHost, "/", h =>

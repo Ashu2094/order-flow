@@ -42,6 +42,13 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<OrderSubmittedConsumer>();
     x.AddConsumer<ReleaseStockConsumer>();
 
+    x.AddEntityFrameworkOutbox<InventoryDbContext>(o =>
+    {
+        o.QueryDelay = TimeSpan.FromSeconds(1);
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
+
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(rabbitHost, "/", h =>
