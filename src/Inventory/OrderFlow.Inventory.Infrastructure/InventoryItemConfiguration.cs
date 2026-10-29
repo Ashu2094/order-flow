@@ -13,6 +13,8 @@ public class InventoryItemConfiguration
     {
         builder.ToTable("inventory_items"); //ToTable sets the table name.
 
+        builder.Property(i => i.Version).IsRowVersion();
+
         builder.HasKey(i => i.Id); //HasKey makes Id the primary key.
 
         builder.Property(i => i.Id).ValueGeneratedNever(); //ValueGeneratedNever means your code supplies the ID.

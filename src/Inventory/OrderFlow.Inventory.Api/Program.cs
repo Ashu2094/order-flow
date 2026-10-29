@@ -7,6 +7,7 @@ using OrderFlow.Inventory.Infrastructure;
 using Scalar.AspNetCore;
 using System.Diagnostics;
 using MassTransit;
+using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,7 @@ builder.Services.AddMassTransit(x =>
         o.QueryDelay = TimeSpan.FromSeconds(1);
         o.UsePostgres();
         o.UseBusOutbox();
+        o.IsolationLevel = IsolationLevel.ReadCommitted;
     });
 
     x.UsingRabbitMq((context, cfg) =>

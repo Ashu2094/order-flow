@@ -59,6 +59,11 @@ public class OrderSubmittedConsumer(InventoryDbContext db, ILogger<OrderSubmitte
             }
         }
 
+        // TEMPORARY: widens the race window for the demo
+        //await Task.Delay(
+        //    TimeSpan.FromSeconds(2),
+        //    context.CancellationToken);
+
         foreach (var line in wanted)
         {
             stock.First(i => i.Sku == line.Sku)

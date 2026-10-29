@@ -20,6 +20,8 @@ public class InventoryItem
 
     public decimal Price { get; private set; }
 
+    public uint Version { get; private set; }
+
     public static InventoryItem Create(Guid id, string sku, string name, int quantity, decimal price, string? description = null)
     {
         return new InventoryItem

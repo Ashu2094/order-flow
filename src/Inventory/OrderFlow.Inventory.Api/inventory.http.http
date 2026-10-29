@@ -156,3 +156,14 @@ Content-Type: application/json
 
 ### 22 Get by SKU -> 200
 GET {{host}}/api/inventory/by-sku/kb-001
+
+### 23 Seed the last unit -> 201
+POST {{host}}/api/inventory
+Content-Type: application/json
+
+{
+  "sku": "LAST-001",
+  "name": "Last Unit Widget",
+  "quantity": 1,
+  "price": 10.00
+}
