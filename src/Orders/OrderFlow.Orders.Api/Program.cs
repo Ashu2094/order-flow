@@ -62,10 +62,19 @@ var rabbitPassword = builder.Configuration["RabbitMq:Password"]
 
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<StockReservedConsumer>();
+    //x.AddConsumer<StockReservedConsumer>();
     x.AddConsumer<StockReservationFailedConsumer>();
-    x.AddConsumer<PaymentCompletedConsumer>();
+    //x.AddConsumer<PaymentCompletedConsumer>();
     x.AddConsumer<PaymentFailedConsumer>();
+
+    x.AddConsumer<OrderConfirmedConsumer>();//saga step
+
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .EntityFrameworkRepository(r =>
+        {
+            r.ConcurrencyMode = ConcurrencyMode.Optimistic;
+            r.ExistingDbContext<OrdersDbContext>();
+        });//saga step
 
     x.AddEntityFrameworkOutbox<OrdersDbContext>(o =>
     {
@@ -259,9 +268,8 @@ app.MapPost(
             new OrderSubmitted(
                 order.Id,
                 order.CreatedAtUtc,
-                order.Items.Select(i =>
-                    new OrderSubmittedItem(i.Sku, i.Quantity)
-                ).ToList()
+                order.Items.Select(i => new OrderSubmittedItem(i.Sku, i.Quantity)).ToList(),
+                order.Items.Sum(i => i.Quantity * i.UnitPrice)
             ),
             ct
         );

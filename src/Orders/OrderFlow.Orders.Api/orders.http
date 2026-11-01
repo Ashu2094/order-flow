@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### 03 Get order -> 200 with 2 items
-GET {{host}}/api/orders/9f2083c5-3db7-4f65-ad38-d38a2fcd176b 
+GET {{host}}/api/orders/3df8cfd2-10bd-4d4b-acfe-2dc5d342da5c 
 
 ### 04 Unknown order -> 404
 GET {{host}}/api/orders/99999999-9999-9999-9999-999999999999

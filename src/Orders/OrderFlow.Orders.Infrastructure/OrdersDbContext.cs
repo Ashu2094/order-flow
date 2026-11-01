@@ -15,6 +15,9 @@ public class OrdersDbContext(
     {
         modelBuilder.ApplyConfiguration(new OrderConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
+
+        new OrderStateMap().Configure(modelBuilder); // saga configuration
+
         modelBuilder.AddInboxStateEntity();
         modelBuilder.AddOutboxMessageEntity();
         modelBuilder.AddOutboxStateEntity();

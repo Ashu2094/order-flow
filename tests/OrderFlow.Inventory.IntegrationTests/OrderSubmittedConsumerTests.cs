@@ -69,7 +69,8 @@ public class OrderSubmittedConsumerTests(DatabaseFixture database) : IClassFixtu
             new OrderSubmitted(
                 orderId,
                 DateTime.UtcNow,
-                [new OrderSubmittedItem(sku, 2)]));
+                [new OrderSubmittedItem(sku, 2)],
+                0m));
 
         Assert.True(await harness.Consumed.Any<OrderSubmitted>());
 
@@ -100,7 +101,9 @@ public class OrderSubmittedConsumerTests(DatabaseFixture database) : IClassFixtu
             new OrderSubmitted(
                 orderId,
                 DateTime.UtcNow,
-                [new OrderSubmittedItem(sku, 5)]));
+                [new OrderSubmittedItem(sku, 5)],
+                0m
+                ));
 
         Assert.True(
             await harness.Published.Any<StockReservationFailed>(
