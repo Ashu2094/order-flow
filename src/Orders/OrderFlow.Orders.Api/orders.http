@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### 03 Get order -> 200 with 2 items
-GET {{host}}/api/orders/3df8cfd2-10bd-4d4b-acfe-2dc5d342da5c 
+GET {{host}}/api/orders/a42323f8-ba88-4552-8193-04a41689ae0a
 
 ### 04 Unknown order -> 404
 GET {{host}}/api/orders/99999999-9999-9999-9999-999999999999
@@ -113,4 +113,7 @@ Content-Type: application/json
   ]
 }
   
+
+### 16 DEBUG late PaymentCompleted (paste the Cancelled order id)
+POST {{host}}/api/debug/late-payment/PASTE_CANCELLED_ORDER_ID
 

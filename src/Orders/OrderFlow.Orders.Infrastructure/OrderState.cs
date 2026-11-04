@@ -13,4 +13,8 @@ public class OrderState : SagaStateMachineInstance
     public DateTime CreatedAtUtc { get; set; } //	Records when the saga was created.
 
     public uint Version { get; set; } //Supports optimistic concurrency using PostgreSQL's xmin mechanism.
+
+    public string ItemsJson { get; set; } = "[]"; //The order lines as JSON, so the saga can send ReleaseStock without reading the order tables
+    public string? FailureReason { get; set; }
+    public bool NeedsRefund { get; set; }
 }

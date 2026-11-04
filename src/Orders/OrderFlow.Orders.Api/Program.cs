@@ -63,12 +63,13 @@ var rabbitPassword = builder.Configuration["RabbitMq:Password"]
 builder.Services.AddMassTransit(x =>
 {
     //x.AddConsumer<StockReservedConsumer>();
-    x.AddConsumer<StockReservationFailedConsumer>();
+    //x.AddConsumer<StockReservationFailedConsumer>();
     //x.AddConsumer<PaymentCompletedConsumer>();
-    x.AddConsumer<PaymentFailedConsumer>();
+    //x.AddConsumer<PaymentFailedConsumer>();
 
-    x.AddConsumer<OrderConfirmedConsumer>();//saga step
+    //x.AddConsumer<OrderConfirmedConsumer>();//saga step
 
+    x.AddConsumer<OrderStatusConsumer>();// now one consumer consumes everything
     x.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .EntityFrameworkRepository(r =>
         {
@@ -322,6 +323,13 @@ app.MapGet(
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-
+app.MapPost("/api/debug/late-payment/{orderId:guid}",
+    async (Guid orderId, IPublishEndpoint publishEndpoint, OrdersDbContext db, CancellationToken ct) =>
+    {
+        await publishEndpoint.Publish(new PaymentCompleted(orderId), ct);
+        await db.SaveChangesAsync(ct); // the bus outbox only sends what is saved
+        return Results.Accepted();
+    });//this request simultes late payment event, which is sent after the order has been cancelled.
+       //The saga will log a warning and mark the order as needing a refund.
 
 app.Run();

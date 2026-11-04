@@ -6,10 +6,7 @@ using OrderFlow.Inventory.Infrastructure;
 
 namespace OrderFlow.Inventory.Api;
 
-public class ReleaseStockConsumer(
-    InventoryDbContext db,
-    ILogger<ReleaseStockConsumer> logger)
-    : IConsumer<ReleaseStock>
+public class ReleaseStockConsumer(InventoryDbContext db,ILogger<ReleaseStockConsumer> logger) : IConsumer<ReleaseStock>
 {
     public async Task Consume(ConsumeContext<ReleaseStock> context)
     {
@@ -29,6 +26,8 @@ public class ReleaseStockConsumer(
 
         await db.SaveChangesAsync(context.CancellationToken);
 
+        await context.Publish(new StockReleased(context.Message.OrderId), context.CancellationToken);
+        //publish the StockReleased event after releasing the stock
         logger.LogInformation(
             "Stock released for order {OrderId}",
             context.Message.OrderId);
