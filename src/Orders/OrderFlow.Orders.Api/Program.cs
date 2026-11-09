@@ -10,6 +10,13 @@ using OrderFlow.Orders.Infrastructure;
 using Scalar.AspNetCore;
 using System.Diagnostics;
 
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString =
@@ -102,6 +109,33 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
+builder.Services.AddOptions<JwtOptions>()
+                .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+                .Validate(o => !string.IsNullOrWhiteSpace(o.Issuer), "Jwt:Issuer is required.")
+                .Validate(o => o.SigningKey.Length >= 32, "Jwt:SigningKey must be at least 32 characters.")
+                .ValidateOnStart();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                  .AddJwtBearer(options =>
+                  {
+                      var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+                                ?? new JwtOptions();
+
+                      options.MapInboundClaims = false;
+                      options.TokenValidationParameters = new TokenValidationParameters
+                      {
+                          ValidateIssuer = true,
+                          ValidIssuer = jwt.Issuer,
+                          ValidateAudience = true,
+                          ValidAudience = jwt.Audience,
+                          ValidateIssuerSigningKey = true,
+                          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
+                          ValidateLifetime = true,
+                          ClockSkew = TimeSpan.FromSeconds(30)
+                      };
+                  });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -133,6 +167,9 @@ app.Use(async (context, next) =>
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 {
@@ -303,7 +340,8 @@ app.MapPost(
 
     }).WithSummary("Create an order")
         .Produces<OrderDto>(StatusCodes.Status201Created)
-        .ProducesValidationProblem();
+        .ProducesValidationProblem()
+        .RequireAuthorization();
 
 //app.MapGet("/api/debug/boom", () =>
 //{
@@ -331,5 +369,42 @@ app.MapPost("/api/debug/late-payment/{orderId:guid}",
         return Results.Accepted();
     });//this request simultes late payment event, which is sent after the order has been cancelled.
        //The saga will log a warning and mark the order as needing a refund.
+
+
+if (app.Configuration.GetValue<bool>("Auth:EnableDevTokens"))
+{
+    app.MapPost("/api/dev/token", (DevTokenRequest request, IOptions<JwtOptions> options) =>
+    {
+        if (string.IsNullOrWhiteSpace(request.UserName))
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["userName"] = ["User name is required."]
+            });
+
+        var jwt = options.Value;
+        var minutes = Math.Clamp(request.ExpiresInMinutes ?? jwt.ExpiryMinutes, 1, 60);
+        var expiresAtUtc = DateTime.UtcNow.AddMinutes(minutes);
+
+        var token = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+        {
+            Issuer = jwt.Issuer,
+            Audience = jwt.Audience,
+            Subject = new ClaimsIdentity(
+            [
+                new Claim(JwtRegisteredClaimNames.Sub, request.UserName),
+                  new Claim(JwtRegisteredClaimNames.Name, request.UserName),
+                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            ]),
+            Expires = expiresAtUtc,
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
+                SecurityAlgorithms.HmacSha256)
+        });
+
+        return Results.Ok(new DevTokenResponse(token, expiresAtUtc));
+    })
+    .AllowAnonymous()
+    .WithSummary("DEV ONLY: issue a signed token for any user name");
+}
 
 app.Run();

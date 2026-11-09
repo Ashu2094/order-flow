@@ -1,14 +1,14 @@
 @host = http://localhost:5214
 # @host = http://localhost:8082
 @orderId = PASTE-AN-ID-HERE
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJvcmRlcmZsb3ctYXBpIiwiaXNzIjoib3JkZXJmbG93LWRldiIsImV4cCI6MTc5NDI0MTExMCwic3ViIjoiYXNoYSIsIm5hbWUiOiJhc2hhIiwianRpIjoiYjFmOTA3ZjYtOWJjOS00MzljLWIwZTMtNmZkZmM2NTlmN2I5IiwiaWF0IjoxNzk0MjQxMDUwLCJuYmYiOjE3OTQyNDEwNTB9.gafD7xS8lv35CNrGEK3Rdx6_jxZNyU7cpkPkQPhT-Z8
 ### 01 Ping -> 200
 GET {{host}}/ping
 
 ### 02 Create order -> 201 (prices come from Inventory)
 POST {{host}}/api/orders
 Content-Type: application/json
-
+Authorization: Bearer {{token}}
 {
   "customerName": "Asha Rao",
   "items": [
@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### 03 Get order -> 200 with 2 items
-GET {{host}}/api/orders/a42323f8-ba88-4552-8193-04a41689ae0a
+GET {{host}}/api/orders/3c3189d6-5340-4f32-8434-3fd17a2d3b4b
 
 ### 04 Unknown order -> 404
 GET {{host}}/api/orders/99999999-9999-9999-9999-999999999999
@@ -116,5 +116,20 @@ Content-Type: application/json
 
 ### 16 DEBUG late PaymentCompleted (paste the Cancelled order id)
 POST {{host}}/api/debug/late-payment/a42323f8-ba88-4552-8193-04a41689ae0a  
+
+### 30 DEV token -> 200
+POST {{host}}/api/dev/token
+Content-Type: application/json
+
+ { "userName": "asha", "expiresInMinutes": 1 }
+
+### 31 Create order WITHOUT a token -> 401
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Asha Rao",
+  "items": [ { "sku": "kb-001", "quantity": 1 } ]
+}
 
 

@@ -98,6 +98,8 @@ services:
       RabbitMq__Username: ${RABBITMQ_USER}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
       Chaos__CrashBeforePublish: "${CHAOS_CRASH_BEFORE_PUBLISH:-false}"
+      Jwt__SigningKey: "${JWT_SIGNING_KEY}"
+      Auth__EnableDevTokens: "true"
     ports:
       - "5214:8080"
     depends_on:
