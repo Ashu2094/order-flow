@@ -115,5 +115,6 @@ Content-Type: application/json
   
 
 ### 16 DEBUG late PaymentCompleted (paste the Cancelled order id)
-POST {{host}}/api/debug/late-payment/PASTE_CANCELLED_ORDER_ID
+POST {{host}}/api/debug/late-payment/a42323f8-ba88-4552-8193-04a41689ae0a  
+
 

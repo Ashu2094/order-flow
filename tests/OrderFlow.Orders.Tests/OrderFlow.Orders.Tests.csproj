@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Orders\OrderFlow.Orders.Domain\OrderFlow.Orders.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Orders\OrderFlow.Orders.Api\OrderFlow.Orders.Api.csproj" />
   </ItemGroup>
 
 </Project>
