@@ -131,11 +131,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                           ValidateIssuerSigningKey = true,
                           IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
                           ValidateLifetime = true,
+                          NameClaimType = "name",
+                          RoleClaimType = "role",
                           ClockSkew = TimeSpan.FromSeconds(30)
                       };
                   });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("PlaceOrders", policy => policy.RequireRole("Customer"));
 
 var app = builder.Build();
 
@@ -341,7 +344,7 @@ app.MapPost(
     }).WithSummary("Create an order")
         .Produces<OrderDto>(StatusCodes.Status201Created)
         .ProducesValidationProblem()
-        .RequireAuthorization();
+        .RequireAuthorization("PlaceOrders");
 
 //app.MapGet("/api/debug/boom", () =>
 //{
@@ -381,6 +384,15 @@ if (app.Configuration.GetValue<bool>("Auth:EnableDevTokens"))
                 ["userName"] = ["User name is required."]
             });
 
+        var roles = request.Roles is { Length: > 0 } ? request.Roles : ["Customer"];
+        string[] allowedRoles = ["Customer", "Admin"];
+
+        if (roles.Except(allowedRoles).Any())
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["roles"] = ["Roles must be Customer or Admin."]
+            });
+
         var jwt = options.Value;
         var minutes = Math.Clamp(request.ExpiresInMinutes ?? jwt.ExpiryMinutes, 1, 60);
         var expiresAtUtc = DateTime.UtcNow.AddMinutes(minutes);
@@ -390,11 +402,13 @@ if (app.Configuration.GetValue<bool>("Auth:EnableDevTokens"))
             Issuer = jwt.Issuer,
             Audience = jwt.Audience,
             Subject = new ClaimsIdentity(
-            [
-                new Claim(JwtRegisteredClaimNames.Sub, request.UserName),
+              new[]
+              {
+                  new Claim(JwtRegisteredClaimNames.Sub, request.UserName),
                   new Claim(JwtRegisteredClaimNames.Name, request.UserName),
                   new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            ]),
+              }
+            .Concat(roles.Select(role => new Claim("role", role)))),           
             Expires = expiresAtUtc,
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),

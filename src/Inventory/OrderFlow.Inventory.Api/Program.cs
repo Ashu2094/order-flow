@@ -8,6 +8,9 @@ using Scalar.AspNetCore;
 using System.Diagnostics;
 using MassTransit;
 using System.Data;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +71,40 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
+builder.Services.AddOptions<JwtOptions>()
+    .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Issuer) && !string.IsNullOrWhiteSpace(o.Audience),
+          "Jwt:Issuer and Jwt:Audience are required.")
+      .Validate(o => o.SigningKey.Length >= 32,
+          "Jwt:SigningKey must be at least 32 characters.")
+      .ValidateOnStart();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+      .AddJwtBearer(options =>
+      {
+          var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+                    ?? new JwtOptions();
+
+          options.MapInboundClaims = false;
+          options.TokenValidationParameters = new TokenValidationParameters
+          {
+              ValidateIssuer = true,
+              ValidIssuer = jwt.Issuer,
+              ValidateAudience = true,
+              ValidAudience = jwt.Audience,
+              ValidateIssuerSigningKey = true,
+              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
+              ValidateLifetime = true,
+              ClockSkew = TimeSpan.FromSeconds(30),
+              NameClaimType = "name",
+              RoleClaimType = "role"
+          };
+      });
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("ManageStock", policy => policy.RequireRole("Admin"));
+
+
 var app = builder.Build();
 
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
@@ -108,6 +145,9 @@ app.Use(async (context, next) =>
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -192,9 +232,11 @@ app.MapPost("/api/inventory", async (CreateInventoryItemRequest request, Invento
         $"/api/inventory/{item.Id}",
         InventoryItemDto.From(item));
 }).WithSummary("Create an inventory item")
+  .RequireAuthorization("ManageStock")
 .Produces<InventoryItemDto>(StatusCodes.Status201Created)
 .ProducesValidationProblem()
-.ProducesProblem(StatusCodes.Status409Conflict); ;
+.ProducesProblem(StatusCodes.Status409Conflict);
+
 
 
 
@@ -234,7 +276,7 @@ app.MapPut(
         await db.SaveChangesAsync(ct);
 
         return Results.Ok(InventoryItemDto.From(item));
-    });
+    }).RequireAuthorization("ManageStock");
 
 
 app.MapDelete(
@@ -257,7 +299,7 @@ app.MapDelete(
         await db.SaveChangesAsync(ct);
 
         return Results.NoContent();
-    });
+    }).RequireAuthorization("ManageStock");
 app.MapGet("/api/debug/boom", () =>
 {
     throw new InvalidOperationException(

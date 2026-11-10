@@ -77,6 +77,7 @@ services:
       RabbitMq__Host: rabbitmq
       RabbitMq__Username: ${RABBITMQ_USER}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      Jwt__SigningKey: "${JWT_SIGNING_KEY}"
     ports:
       - "5213:8080"
     depends_on:

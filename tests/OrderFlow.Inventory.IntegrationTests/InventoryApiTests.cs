@@ -7,7 +7,9 @@ namespace OrderFlow.Inventory.IntegrationTests;
 public class InventoryApiTests(InventoryApiFixture fixture)
     : IClassFixture<InventoryApiFixture>
 {
-    private readonly HttpClient _client = fixture.Factory.CreateClient();
+    //private readonly HttpClient _client = fixture.Factory.CreateClient();
+    private readonly HttpClient _client = fixture.CreateClient("Admin");
+    private readonly InventoryApiFixture _fixture = fixture;
 
     private record ItemResponse(
         Guid Id,
@@ -77,5 +79,23 @@ public class InventoryApiTests(InventoryApiFixture fixture)
             $"/api/inventory/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Creating_stock_without_a_token_returns_401()
+    {
+        var response = await _fixture.CreateClient().PostAsJsonAsync("/api/inventory",
+            new { sku = NewSku(), name = "No token", quantity = 1, price = 1m });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Creating_stock_as_a_Customer_returns_403()
+    {
+        var response = await _fixture.CreateClient("Customer").PostAsJsonAsync("/api/inventory",
+            new { sku = NewSku(), name = "Customer", quantity = 1, price = 1m });
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }

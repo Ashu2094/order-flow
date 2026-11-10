@@ -104,11 +104,12 @@ Content-Type: application/json
 ### 13 Empty body -> 400
 POST {{host}}/api/inventory
 Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
 
 ### 14 Text where a number belongs -> 400
 POST {{host}}/api/inventory
 Content-Type: application/json
-
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
 {
   "sku": "OK-2",
   "name": "Thing",
@@ -135,7 +136,7 @@ GET {{host}}/health
 ### 20 Seed keyboard -> 201 (or 409 if it exists)
 POST {{host}}/api/inventory
 Content-Type: application/json
-
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
 {
   "sku": "KB-001",
   "name": "Keyboard",
@@ -146,7 +147,7 @@ Content-Type: application/json
 ### 21 Seed mouse -> 201 (or 409 if it exists)
 POST {{host}}/api/inventory
 Content-Type: application/json
-
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
 {
   "sku": "MS-002",
   "name": "Mouse",
@@ -160,10 +161,32 @@ GET {{host}}/api/inventory/by-sku/kb-001
 ### 23 Seed the last unit -> 201
 POST {{host}}/api/inventory
 Content-Type: application/json
-
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
 {
   "sku": "LAST-001",
   "name": "Last Unit Widget",
   "quantity": 1,
   "price": 10.00
 }
+
+### 00 Get an ADMIN token from Orders (run this first)
+# @name adminLogin
+POST http://localhost:5214/api/dev/token
+Content-Type: application/json
+
+{ "userName": "admin", "roles": ["Admin"] }
+
+### 01 Get a CUSTOMER token from Orders
+# @name customerLogin
+POST http://localhost:5214/api/dev/token
+Content-Type: application/json
+
+{ "userName": "asha", "roles": ["Customer"] }
+
+
+### 24 Create stock as a CUSTOMER -> 403
+POST {{host}}/api/inventory
+Content-Type: application/json
+Authorization: Bearer {{customerLogin.response.body.$.accessToken}}
+
+{ "sku": "NOPE-001", "name": "Should fail", "quantity": 1, "price": 1.00 }

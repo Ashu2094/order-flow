@@ -8,7 +8,7 @@ GET {{host}}/ping
 ### 02 Create order -> 201 (prices come from Inventory)
 POST {{host}}/api/orders
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{customerLogin.response.body.$.accessToken}}
 {
   "customerName": "Asha Rao",
   "items": [
