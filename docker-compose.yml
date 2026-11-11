@@ -78,8 +78,8 @@ services:
       RabbitMq__Username: ${RABBITMQ_USER}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
       Jwt__SigningKey: "${JWT_SIGNING_KEY}"
-    ports:
-      - "5213:8080"
+    # ports:
+      # - "5213:8080"
     depends_on:
       inventory-db:
         condition: service_healthy
@@ -101,8 +101,8 @@ services:
       Chaos__CrashBeforePublish: "${CHAOS_CRASH_BEFORE_PUBLISH:-false}"
       Jwt__SigningKey: "${JWT_SIGNING_KEY}"
       Auth__EnableDevTokens: "true"
-    ports:
-      - "5214:8080"
+    # ports:
+      # - "5214:8080"
     depends_on:
       orders-db:
         condition: service_healthy
@@ -121,13 +121,27 @@ services:
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
       PaymentSimulation__ForceFailure: "${PAYMENT_FORCE_FAILURE:-false}"
       Database__MigrateOnStartup: "true"
-    ports:
-      - "5215:8080"
+    # ports:
+      # - "5215:8080"
     depends_on:
       payments-db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
+  gateway:
+    build:
+      context: .
+      dockerfile: src/Gateway/OrderFlow.Gateway/Dockerfile
+    container_name: orderflow-gateway
+    environment:
+      ReverseProxy__Clusters__orders-cluster__Destinations__d1__Address: "http://orders-api:8080/"
+      ReverseProxy__Clusters__inventory-cluster__Destinations__d1__Address: "http://inventory-api:8080/"
+    ports:
+      - "5200:8080"
+    depends_on:
+      - orders-api
+      - inventory-api
         
 volumes:
   orders-db-data:

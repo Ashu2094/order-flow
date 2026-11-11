@@ -1,7 +1,9 @@
 <Solution>
+  <Folder Name="/Gateway/">
+    <Project Path="src/Gateway/OrderFlow.Gateway/OrderFlow.Gateway.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".dockerignore" />
-    <File Path="JwtOptions.cs" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Contracts/">

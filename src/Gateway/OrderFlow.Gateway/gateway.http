@@ -1,0 +1,48 @@
+@gw = http://localhost:5200
+
+### G01 Admin token
+# @name adminLogin
+POST {{gw}}/v1/dev/token
+Content-Type: application/json
+
+{ "userName": "admin", "roles": ["Admin"] }
+
+### G02 Customer token
+# @name customerLogin
+POST {{gw}}/v1/dev/token
+Content-Type: application/json
+
+{ "userName": "asha", "roles": ["Customer"] }
+
+### G10 Seed keyboard (Admin)
+POST {{gw}}/v1/inventory
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
+
+{ "sku": "KB-001", "name": "Mechanical Keyboard", "quantity": 25, "price": 49.99 }
+
+### G11 Seed mouse (Admin)
+POST {{gw}}/v1/inventory
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
+
+{ "sku": "MS-002", "name": "Wireless Mouse", "quantity": 40, "price": 19.50 }
+
+### G20 Place an order (Customer)
+POST {{gw}}/v1/orders
+Content-Type: application/json
+Authorization: Bearer {{customerLogin.response.body.$.accessToken}}
+
+{
+  "customerName": "Asha Rao",
+  "items": [
+    { "sku": "KB-001", "quantity": 2 },
+    { "sku": "MS-002", "quantity": 1 }
+  ]
+}
+
+### G21 Get the order (paste the id)
+GET {{gw}}/v1/orders/533a532e-6a8c-4e20-a341-d9b654927dba
+
+### G22 List orders
+GET {{gw}}/v1/orders?page=1&pageSize=10
