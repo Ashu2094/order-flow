@@ -137,6 +137,8 @@ services:
     environment:
       ReverseProxy__Clusters__orders-cluster__Destinations__d1__Address: "http://orders-api:8080/"
       ReverseProxy__Clusters__inventory-cluster__Destinations__d1__Address: "http://inventory-api:8080/"
+      Jwt__SigningKey: "${JWT_SIGNING_KEY}"
+      RateLimiting__PermitLimit: "${GATEWAY_PERMIT_LIMIT:-10}"
     ports:
       - "5200:8080"
     depends_on:
